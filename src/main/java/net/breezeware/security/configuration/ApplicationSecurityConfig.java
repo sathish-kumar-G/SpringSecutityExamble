@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import static net.breezeware.security.enumeration.UserPermission.COURSE_WRITE;
@@ -21,6 +22,37 @@ import static net.breezeware.security.enumeration.UserRoles.*;
 @Configuration
 @EnableWebSecurity
 public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
+
+/*    //Current Scenario
+SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+    return httpSecurity.csrf().disable().authorizeRequests()
+            .antMatchers("/", "index", "/css/*", "/js/*").permitAll()
+            .antMatchers("/api/**").hasRole(STUDENT.name())
+            *//* .antMatchers(HttpMethod.DELETE,"/management/api/**").hasAuthority(COURSE_WRITE.getPermissions())
+             .antMatchers(HttpMethod.POST,"/management/api/**").hasAuthority(COURSE_WRITE.getPermissions())
+             .antMatchers(HttpMethod.PUT,"/management/api/**").hasAuthority(COURSE_WRITE.getPermissions())
+             .antMatchers(HttpMethod.GET,"/management/api/**").hasAnyRole(ADMIN.name(), ADMINTRAINEE.name())*//*
+            .anyRequest().authenticated()
+            .and()
+            // .httpBasic(); //Basic Authentication
+            .formLogin()  //Form Based Authentication
+            .loginPage("/login").permitAll() //Permit All Users in Login Page
+            .defaultSuccessUrl("/courses",true)//After SuccessFul Login go to this URL
+            .usernameParameter("username")
+            .passwordParameter("password")
+            .and()
+            .rememberMe()//It is Remember the Session Time
+            .tokenValiditySeconds((int) TimeUnit.DAYS.toSeconds(21)) //21 Hours
+            .key("SomeStringValue")
+            .rememberMeParameter("remember-me")
+            .and()
+            .logout().logoutUrl("/logout") //Set the Logout URL
+            .logoutRequestMatcher(new AntPathRequestMatcher("/logout","GET"))
+            .clearAuthentication(true)  //Clear Authentication
+            .invalidateHttpSession(true)  //Clear Session
+            .deleteCookies("JSESSIONID","remember-me") //Delete the Cookies
+            .logoutSuccessUrl("/login").and().build(); //After Logout go to this URL
+}*/
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
@@ -36,19 +68,22 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                // .httpBasic(); //Basic Authentication
                 .formLogin()  //Form Based Authentication
-                .loginPage("/login").permitAll() //Permit All Users in Login Page
-                .defaultSuccessUrl("/courses",true)//After SuccessFul Login go to this URL
-                .and()
-                .rememberMe()//It is Remember the Session Time
+                   .loginPage("/login").permitAll() //Permit All Users in Login Page
+                   .defaultSuccessUrl("/courses",true)//After SuccessFul Login go to this URL
+                   .usernameParameter("username")
+                   .passwordParameter("password")
+                   .and()
+                   .rememberMe()//It is Remember the Session Time
                       .tokenValiditySeconds((int) TimeUnit.DAYS.toSeconds(21)) //21 Hours
                       .key("SomeStringValue")
+                      .rememberMeParameter("remember-me")
                 .and()
                 .logout().logoutUrl("/logout") //Set the Logout URL
-                .logoutRequestMatcher(new AntPathRequestMatcher("/logout","GET"))
-                .clearAuthentication(true)  //Clear Authentication
-                .invalidateHttpSession(true)  //Clear Session
-                .deleteCookies("JSESSIONID","remember-me") //Delete the Cookies
-                .logoutSuccessUrl("/login"); //After Logout go to this URL
+                  .logoutRequestMatcher(new AntPathRequestMatcher("/logout","GET"))
+                  .clearAuthentication(true)  //Clear Authentication
+                  .invalidateHttpSession(true)  //Clear Session
+                  .deleteCookies("JSESSIONID","remember-me") //Delete the Cookies
+                  .logoutSuccessUrl("/login"); //After Logout go to this URL
     }
 
     @Override
